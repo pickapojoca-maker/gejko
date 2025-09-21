@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imperializem – pomembne bitke</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    body { margin:0; padding:0; font-family: Arial, sans-serif; }
+    #map { height: 90vh; width: 100%; }
+    h1 { text-align:center; margin:10px 0; }
+    .legend {
+      background: white;
+      line-height: 1.5em;
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+    .legend-color {
+      display:inline-block;
+      width:20px;
+      height:20px;
+      margin-right:6px;
+      vertical-align:middle;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Imperializem – pomembne bitke</h1>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  var map = L.map('map');
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Markerji za bitke
+  var battles = [
+    {name: "Bitka pri Adwa", coords: [9.145, 39.745], text: "Bitka leta 1896, Etiopija proti Italiji..."},
+    {name: "Bitka pri Plassey", coords: [23.9, 88.35], text: "Bitka leta 1757, Britanci proti Bengalcem..."},
+    {name: "Bitka pri Omdurmanu", coords: [15.58, 32.55], text: "Bitka leta 1898, Britanci proti Mahdistom..."},
+    {name: "Bitka pri Isandlwani", coords: [-28.85, 31.86], text: "Bitka leta 1879, Zulu proti Britancem..."},
+    {name: "Bitka pri Manili", coords: [14.6, 120.98], text: "Bitka leta 1898, Špansko-ameriška vojna..."},
+    {name: "Bitka pri Khartoumu", coords: [15.5, 32.56], text: "Obleganje Khartouma 1884–1885..."},
+    {name: "Bitka pri Mafekingu", coords: [-26.15, 25.85], text: "Obleganje Mafekinga med drugo bursko vojno..."},
+    {name: "Bitka pri Spioenkopu", coords: [-28.62, 29.8], text: "Bitka leta 1900 v drugi burski vojni..."},
+    {name: "Bitka pri Taku Forts", coords: [39.03, 117.68], text: "Bitka leta 1900 med silami osmih narodov..."}
+  ];
+
+  var markers = L.featureGroup();
+  battles.forEach(function(battle){
+    var marker = L.circleMarker(battle.coords, {
+      radius: 10,
+      color: 'red',
+      fillColor: 'orange',
+      fillOpacity: 0.8
+    }).bindPopup(`<b>${battle.name}</b><br>${battle.text}`);
+    markers.addLayer(marker);
+  });
+  markers.addTo(map);
+  map.fitBounds(markers.getBounds(), {padding:[50,50]});
+
+  // Seznam imperijev z geojson datotekami
+  var empires = [
+    {name:"Britanski imperij", file:"data/geojson/british_empire_1900.geojson", color:"lightblue"},
+    {name:"Francoski imperij", file:"data/geojson/french_empire_1900.geojson", color:"lightgreen"},
+    {name:"Španski imperij", file:"data/geojson/spanish_empire_1900.geojson", color:"pink"},
+    {name:"Portugalski imperij", file:"data/geojson/portuguese_empire_1900.geojson", color:"purple"},
+    {name:"Italijanski imperij", file:"data/geojson/italian_empire_1900.geojson", color:"orange"},
+    {name:"Nizozemski imperij", file:"data/geojson/dutch_empire_1900.geojson", color:"yellow"},
+    {name:"Belgijski imperij", file:"data/geojson/belgian_empire_1900.geojson", color:"brown"}
+  ];
+
+  empires.forEach(function(emp){
+    fetch(emp.file)
+      .then(res => res.json())
+      .then(data => L.geoJSON(data, {style:{color:emp.color, fillColor:emp.color, fillOpacity:0.3}}).addTo(map));
+  });
+
+  // Legenda
+  var legend = L.control({position:'bottomright'});
+  legend.onAdd = function(map){
+    var div = L.DomUtil.create('div','legend');
+    empires.forEach(function(emp){
+      div.innerHTML += '<div><span class="legend-color" style="background:'+emp.color+'"></span>'+emp.name+'</div>';
+    });
+    return div;
+  };
+  legend.addTo(map);
+
+</script>
+</body>
+</html>
