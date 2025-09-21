@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imperializem – pomembne bitke</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    body { margin:0; padding:0; font-family: Arial, sans-serif; }
+    #map { height: 90vh; width: 100%; }
+    h1 { text-align:center; margin:10px 0; }
+    .legend {
+      background: white;
+      line-height: 1.5em;
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+    .legend-color {
+      display:inline-block;
+      width:20px;
+      height:20px;
+      margin-right:6px;
+      vertical-align:middle;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Imperializem – pomembne bitke</h1>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+</script>
+<script>
+  // Ustvari zemljevid
+  var map = L.map('map');
+
+  // Dodaj OpenStreetMap layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Seznam bitk
+  var battles = [
+    {name: "Bitka pri Adwa", coords: [9.145, 39.745], text: "Bitka leta 1896, Etiopija proti Italiji. Etiopske sile pod poveljstvom cesarja Menelika II. in carice Taitu so premagale italijansko vojsko. Bitka je postala simbol odpora afriških držav proti evropskemu imperializmu in utrdila neodvisnost Etiopije."},
+    {name: "Bitka pri Plassey", coords: [23.9, 88.35], text: "Bitka leta 1757, Britanci proti Bengalcem. Britanska Vzhodnoindijska družba, pod Robertom Clivom, je premagala vojake vladarja Siraj ud-Daula. Zmaga je Britancem omogočila nadzor nad Bengalom in bila ključen korak pri širjenju britanskega imperija v Indiji."},
+    {name: "Bitka pri Omdurmanu", coords: [15.58, 32.55], text: "Bitka leta 1898, britanska kolonialna vojska proti Mahdistom v Sudanu, pod poveljstvom generala Horatia Kitchenerja. Zmaga Britancev je utrdila britansko kontrolo nad Sudanom in omogočila širitev imperija v vzhodni Afriki."},
+    {name: "Bitka pri Isandlwani", coords: [-28.85, 31.86], text: "Bitka leta 1879, Zulu proti Britancem. Zulu so dosegli presenetljivo zmago nad britanskimi silami, kar je začasno zaustavilo britansko napredovanje v Južni Afriki."},
+    {name: "Bitka pri Manili", coords: [14.6, 120.98], text: "Bitka leta 1898, Špansko-ameriška vojna. Ameriške sile pod admiralom Georgeom Deweyjem so premagale Špance, kar je privedlo do ameriške okupacije Filipinov."},
+    {name: "Bitka pri Khartoumu", coords: [15.5, 32.56], text: "Obleganje Khartouma 1884–1885, Mahdisti proti Egipčanom in Britancem. Smrt generala Charlesa Gordona je sprožila britanski intervencijski pohod, ki je kasneje ponovno osvojil mesto."},
+    {name: "Bitka pri Mafekingu", coords: [-26.15, 25.85], text: "Obleganje Mafekinga med drugo bursko vojno 1899–1900. Britanski obrambni poveljnik Robert Baden-Powell je uspešno branil mesto. Odpornost obleganih je postala simbol poguma."},
+    {name: "Bitka pri Spioenkopu", coords: [-28.62, 29.8], text: "Bitka leta 1900 v drugi burski vojni, Britanci proti Buri. Kljub velikim izgubam Britancev je bitka omogočila nadaljevanje ofenzive in kasnejšo zmago Britancev."},
+    {name: "Bitka pri Taku Forts", coords: [39.03, 117.68], text: "Bitka leta 1900 med silami osmih narodov in Kitajsko med Boksarskim uporom. Tuja vojska je osvojila utrjene Taku Forts ob Reki Haihe, kar je utrdilo tuje vplive v Kitajski."}
+  ];
+
+  // Dodaj markerje za bitke
+  var markers = L.featureGroup();
+  battles.forEach(function(battle){
+    var marker = L.circleMarker(battle.coords, {
+      radius: 10,
+      color: 'red',
+      fillColor: 'orange',
+      fillOpacity: 0.8
+    }).bindPopup(`<b>${battle.name}</b><br>${battle.text}`);
+    markers.addLayer(marker);
+  });
+  markers.addTo(map);
+
+  // Avtomatski zoom na vse markerje
+  map.fitBounds(markers.getBounds(), {padding: [50,50]});
+
+  // --------- GeoJSON sloji za kolonialna ozemlja ---------
+  var empires = [
+    {name:"Britanski imperij", color:"lightblue", coords:[[[-10,50],[0,50],[0,40],[-10,40],[-10,50]]]},
+    {name:"Francoski imperij", color:"lightgreen", coords:[[[0,50],[10,50],[10,40],[0,40],[0,50]]]},
+    {name:"Španski imperij", color:"pink", coords:[[[0,40],[10,40],[10,30],[0,30],[0,40]]]},
+    {name:"Portugalski imperij", color:"purple", coords:[[[10,10],[20,10],[20,0],[10,0],[10,10]]]},
+    {name:"Italijanski imperij", color:"orange", coords:[[[10,40],[20,40],[20,30],[10,30],[10,40]]]},
+    {name:"Nizozemski imperij", color:"yellow", coords:[[[20,0],[30,0],[30,-10],[20,-10],[20,0]]]},
+    {name:"Belgijski imperij", color:"brown", coords:[[[0,10],[10,10],[10,0],[0,0],[0,10]]]}
+  ];
+
+  empires.forEach(function(emp){
+    L.geoJSON({
+      "type":"Feature",
+      "properties":{"name":emp.name},
+      "geometry":{"type":"Polygon","coordinates":emp.coords}
+    }, {
+      style:{color:emp.color, fillColor:emp.color, fillOpacity:0.3}
+    }).addTo(map);
+  });
+
+  // --------- Legenda ---------
+  var legend = L.control({position:'bottomright'});
+  legend.onAdd = function(map){
+    var div = L.DomUtil.create('div','legend');
+    empires.forEach(function(emp){
+      div.innerHTML += '<div><span class="legend-color" style="background:'+emp.color+'"></span>'+emp.name+'</div>';
+    });
+    return div;
+  };
+  legend.addTo(map);
+var empires = [
+  {name:"Britanski imperij", file:"data/world_1880.geojson", color:"lightblue"},
+  {name:"Francoski imperij", file:"data/geojson/french_empire_1900.geojson", color:"lightgreen"},
+  {name:"Španski imperij", file:"data/geojson/spanish_empire_1900.geojson", color:"pink"},
+  {name:"Portugalski imperij", file:"data/geojson/portuguese_empire_1900.geojson", color:"purple"},
+  {name:"Italijanski imperij", file:"data/geojson/italian_empire_1900.geojson", color:"orange"},
+  {name:"Nizozemski imperij", file:"data/geojson/dutch_empire_1900.geojson", color:"yellow"},
+  {name:"Belgijski imperij", file:"data/geojson/belgian_empire_1900.geojson", color:"brown"}
+];
+
+empires.forEach(function(emp){
+  fetch(emp.file)
+    .then(res => res.json())
+    .then(data => {
+      L.geoJSON(data, {style:{color:emp.color, fillColor:emp.color, fillOpacity:0.3}}).addTo(map);
+    });
+});
+</script>
+
+</body>
+</html>
